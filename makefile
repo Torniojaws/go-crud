@@ -3,7 +3,7 @@ SHELL := /bin/bash
 install:
     sudo apt install golang-go go-dep
     export GOPATH=~/go
-    go get -u golang.org/x/lint/golint
+    go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
     echo "Add export GOPATH to your .bash_profile"
     mkdir -p $GOPATH/src/github.com/Torniojaws/go-crud
     echo "Make sure the repository was cloned to $GOPATH/src/github.com/Torniojaws/go-crud"
@@ -14,4 +14,5 @@ run:
     go run main.go
     
 test:
+    golangci-lint run
     go test
