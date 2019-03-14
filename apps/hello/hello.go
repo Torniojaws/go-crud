@@ -9,6 +9,13 @@ type Post struct {
     Number int `form:"number" json:"number" binding:"required"`
 }
 
+// Put is the expected payload in the PUT /hello/:id endpoint
+type Put struct {
+    Something string `form:"some" json:"some" binding:"required"`
+    Message string `form:"message" json:"message" binding:"required"`
+    Number int `form:"number" json:"number" binding:"required"`
+}
+
 // Create will handle the POST request
 func Create(ctx *gin.Context) {
     var json Post
@@ -25,20 +32,64 @@ func Create(ctx *gin.Context) {
 }
 
 // Read will get you info
-func Read(ctx *gin.Context) {
+func ReadOne(ctx *gin.Context) {
+    var response string
+    maybeID := ctx.Param("id")
+    if id, err := strconv.Atoi(maybeID); err == nil {
+        response += "This would the data of Hello ID: " + strconv.Itoa(id)   
+    } else {
+        response += "No such ID found: " + maybeID   
+    }
     ctx.JSON(200, gin.H {
-        "message": "Hello there!",
+        "message": response,
+    })
+}
+
+// ReadAll will get you everything you wanted
+func ReadAll(ctx *gin.Context) {
+    ctx.JSON(200, gin.H {
+        "message": "Hello all!",
     })
 }
 
 // Update will do stuff
 func Update(ctx *gin.Context) {
-    ctx.JSON(200, gin.H {
-        "message": "Updated hello!",
+    maybeID := ctx.Param("id")
+    var json Put
+    
+    var response string
+    var code int
+    
+    if id, err := strconv.Atoi(maybeID); err == nil {
+        if ctx.BindJSON(&json) == nil {
+            response += "Updating ID: " + strconv.Itoa(id)
+            response += "New values: " + json.Something + " " + json.Message + " " + strconv.Itoa(json.Number)
+            code = 200
+        } else {
+            response += "Invalid JSON"
+            code = 400
+        }
+    } else {
+        response += "No such ID found: " + maybeID
+        code = 404
+    }
+
+    ctx.JSON(code, gin.H {
+        "message": response,
     })
 }
 
 // Delete will be gone
 func Delete(ctx *gin.Context) {
-    ctx.JSON(204, gin.H {})
+    var maybeID := ctx.Param("id")
+    
+    var code int
+    if id, err := strconv.Atoi(maybeID); err == nil {
+        fmt.Println("Removing ID: " + id)
+        code = 204
+    } else {
+        code = 400
+    }
+    
+    ctx.JSON(code, gin.H {})
 }
